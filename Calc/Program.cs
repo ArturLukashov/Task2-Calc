@@ -38,7 +38,7 @@ namespace Calc
                             Console.WriteLine($"Результат:{result}");
                             break;
                         case "/":
-                        //    result = ;
+                            result = ownMath.Divide(first,second);
                             Console.WriteLine($"Результат:{result}");
                             break;
                         default: Console.WriteLine("Неверная операция"); break;
@@ -70,12 +70,39 @@ namespace Calc
                 return false;
             }
         }
+      
+        private static bool maxOfTwo(string first, string second)
+        {
+            if (first.Length < second.Length)
+            {
+                return true;
+            }
+            else
+            {
+                if (first.Length == second.Length)
+                {
+                    for (int i = 0; i < first.Length; i++)
+                    {
+                        if (first[i] == second[i])
+                        {
+                            continue;
+                        }
+                        if (second[i] > first[i])
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
         public static string Sum(string first, string second)
         {           
             string final = String.Empty;
-            int add = 0, chislo = 0;
+            int div = 0;           
             bool firstSign = false;
             bool secondSign = false;
+            string temp = String.Empty;
             if (ownMath.checkSign(first[0]) == true)
             {
                 first = first.Remove(0, 1);
@@ -90,49 +117,71 @@ namespace Calc
             {
                 return ownMath.Minus(first, second);                 
             }
-            for (int i = first.Length - 1, j = second.Length - 1; i >= 0 && j >= 0; i--, j--)
+            if (second.Length > first.Length)
             {
-                if (add == 1)
-                {
-                    chislo = Int32.Parse(first[i].ToString()) + Int32.Parse(second[j].ToString()) + 1;
-                }
-                else
-                {
-                    chislo = Int32.Parse(first[i].ToString()) + Int32.Parse(second[j].ToString());
-                }
-                final = (chislo % 10) + final;
-                if (chislo > 9)
-                {
-                    add = 1;
-                }
-                else
-                {
-                    add = 0;
-                }
-            }
-            if (add == 1)
-            {
-                final = '1' + final;
-            }
-            int razn = first.Length - second.Length;
-            if (razn > 0)
-            {
-                for (int i = razn - 1; i >= 0; i--)
-                {
-                    final = first[i] + final;
-                }
+                temp = first;
+                first = second;
+                second = temp;              
             }
             else
             {
-                if (razn < 0)
+                if (first.Length == second.Length)
                 {
-                    for (int i = Math.Abs(razn) - 1; i >= 0; i--)
+                    for (int i = 0; i < first.Length; i++)
                     {
-                        final = second[i] + final;
+                        if (first[i] == second[i])
+                        {
+                            continue;
+                        }
+                        if (second[i] > first[i])
+                        {
+                            temp = first;
+                            first = second;
+                            second = temp;                      
+                            break;
+                        }
                     }
                 }
-            }      
-            if(firstSign == true && secondSign == true)
+            }           
+            for (int i = first.Length - 1, j = second.Length - 1; i >= 0 && j >= 0; i--, j--)
+            {
+                int chislo = Int32.Parse(second[j].ToString()) + Int32.Parse(first[i].ToString());
+                if (div > 0)
+                {
+                    chislo += div;
+                }
+                int mod = chislo % 10;
+                div = chislo / 10;
+                final = mod + final;
+            }                                              
+            int razn = first.Length - second.Length;
+            if (razn > 0)         
+            {
+                for (int i = razn - 1; i >= 0; i--)
+                {
+                    if (div > 0)
+                    {
+                        if ((Int32.Parse(first[i].ToString()) + 1) == 10)
+                        {
+                            final = "0" + final;
+                        }
+                        else
+                        {
+                            final = (Int32.Parse(first[i].ToString()) + div) + final;
+                            div = 0;                          
+                        }
+                    }
+                    else
+                    {
+                        final = first[i] + final;
+                    }
+                }
+            }
+            if (div > 0)
+            {
+                final = div + final;
+            }
+            if (firstSign == true && secondSign == true)
             {
                 final = "-" + final; 
             }
@@ -212,7 +261,7 @@ namespace Calc
                 }
                 final = temp + final; 
             }
-            if (final[0] == '0')
+            if (final[0] == '0' && final.Length!=1)
             {
                 final = final.Remove(0, 1); 
             }
@@ -275,5 +324,27 @@ namespace Calc
             return prom;           
         }
 
+        public static string Divide(string first,string second)
+        {
+            if(second.Length > first.Length)
+            {
+                return "0";
+            }          
+            string prom = ownMath.Minus(first, second);
+            string temp = "1"; 
+            if (prom[0] == '-')
+            {
+                temp = "0";
+                return temp;
+            }
+
+            while (ownMath.maxOfTwo(prom, second) == false)
+            {
+                prom = ownMath.Minus(prom, second);
+                temp = ownMath.Sum(temp, "1");
+            }
+            return temp; 
+
+        }
     }
 }
